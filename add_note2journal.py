@@ -18,6 +18,13 @@ WEEK_DAYS = {
 }
 
 
+def create_argparser():
+    parser = argparse.ArgumentParser(description=u'Adds note to notebook "Дневник", uses template note')
+    parser.add_argument('--date', nargs='?', type=is_valid_date,
+                        help='date in format "YYYY-MM-DD"')
+    return parser
+
+
 def is_valid_date(text):
     text = text.strip()
     if text.startswith('-') or text.startswith('+') or text.isdigit():
@@ -31,21 +38,16 @@ def is_valid_date(text):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description=u'Adds note to notebook "Дневник", uses template note')
-    parser.add_argument('date',
-                        nargs='?',
-                        type=is_valid_date,
-                        help='date in format "YYYY-MM-DD"')
+    parser = create_argparser()
     args = parser.parse_args()
 
     config = Settings()
 
     client = EvernoteClient(
         token=config.EVERNOTE_PERSONAL_TOKEN,
-        sandbox=False # Default: True
+        sandbox=True # Default: True
     )
     noteStore = client.get_note_store()
-
     day = args.date or date.today()
     context = {
         'date': day.isoformat(),
@@ -54,7 +56,7 @@ if __name__ == '__main__':
     print('Title Context is:')
     print(json.dumps(context, ensure_ascii=False, indent=4))
 
-    new_note = noteStore.copyNote(config.JOURNAL_TEMPLATE_NOTE_GUID, config.JOURNAL_NOTEBOOK_GUID)
+    new_note = noteStore.copyNote(config.EVERNOTE_PERSONAL_TOKEN, config.JOURNAL_TEMPLATE_NOTE_GUID, config.JOURNAL_NOTEBOOK_GUID)
     utitle_without_comment = new_note.title.decode('utf8').split('#', 1)[0]
     utitle = utitle_without_comment.strip().format(**context)
     new_note.title = utitle.encode('utf8')

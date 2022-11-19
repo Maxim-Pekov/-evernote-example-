@@ -1,4 +1,9 @@
 from pydantic import BaseSettings
+from environs import Env
+
+
+env = Env()
+env.read_env()
 
 
 class Settings(BaseSettings):
@@ -10,7 +15,9 @@ class Settings(BaseSettings):
     JOURNAL_NOTEBOOK_GUID: str
 
     INBOX_NOTEBOOK_GUID: str
-    
+
     class Config:
         env_file = '.env'
         env_file_encoding = 'utf-8'
+
+
